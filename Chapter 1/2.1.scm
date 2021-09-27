@@ -28,4 +28,4 @@
     (display "/")
      (display (denom x)))
 
-(print-rat (div-rat (make-rat -1 3) (make-rat 1 -2)))
+(print-rat (add-rat (make-rat -1 3) (make-rat 1 -2)))

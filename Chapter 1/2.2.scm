@@ -8,6 +8,12 @@
     (make-segment (/ (+ (x-point(start-segment s)) (x-point(end-segment s))) 2)
                 (/ (+ (y-point(start-segment s)) (y-point(end-segment s))) 2)))
 
+(define (s-length s)
+    (let    
+        (dx (- (x-point(start-segment s)) (x-point(end-segment s)))
+        (dy (- (+ (y-point(start-segment s)) (y-point(end-segment s)))) 2))
+        (sqrt (+ (expt dx 2) (expt dy 2)))))
+    
 (define (make-point x y)
     (cons x y))
 (define (x-point p)
