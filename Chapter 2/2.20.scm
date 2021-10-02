@@ -1,0 +1,10 @@
+(define (same-parity compVal . thelist)
+    (define (parity-check compVal items)
+    (if (null? items)
+        (list)
+        (if (= (modulo compVal 2) (modulo (car items) 2))
+            (cons (car items) (parity-check compVal (cdr items)))
+            (parity-check compVal (cdr items)))))
+   (cons compVal (parity-check compVal thelist)))
+        
+(display (same-parity 1 3 4 5 6))
