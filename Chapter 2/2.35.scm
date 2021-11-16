@@ -1,0 +1,13 @@
+(define (count-leaves t)
+    (define (op head tail)
+        (if (pair? head)
+            (+ (count-leaves head) tail)
+            (+ 1 tail)))
+    (accumulate op 0 t))
+
+(newline)
+(display (count-leaves (list 3 4)))
+(newline)
+(display (count-leaves (list (list 1 2) (list 3 4))))
+(newline)
+(display (count-leaves (list 1)))
