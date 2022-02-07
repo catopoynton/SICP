@@ -4,7 +4,7 @@
             (+ (count-leaves head) tail)
             (+ 1 tail)))
     (accumulate op 0 t))
-
+(define count)
 (newline)
 (display (count-leaves (list 3 4)))
 (newline)
