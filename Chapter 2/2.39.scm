@@ -31,4 +31,3 @@
                                         (map (lambda (z) (cons x z)) y))) 
                                         list('()) s))
 
-(display (unique-pairs 5))
