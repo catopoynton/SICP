@@ -77,7 +77,7 @@
 (define (count lst)
     (accumulate (lambda (x y) (+ 1 y)) 0 lst))
 
-(count (queens 11))
+(count (queens 12))
 
 ;(display (add-row (list (empty-board 3) (empty-board 3)) 2 3))
 
