@@ -1,6 +1,6 @@
 ;for this exercise, he assume that all types are part of the tower hierarchy. This means that the raise-types procwill always return a pair of arguements that are of the same types.
 ;we would need a graph representation of the types to deal with disconected towers of types
-(load "/Users/catopoynton/Desktop/SICP/Chapter 2/number-package.scm")
+
 
 (define (higher-type? a1 a2)
     (let ((raise-proc (get 'raise  (list (type-tag a1)))))
@@ -16,6 +16,7 @@
 (define (raise-args args)
     (map raise args))
 
+;unify-types raises all the arguements in a list to the arguement of the highest type
 (define (unify-types args)
     (define (unify-iter checked-args unchecked-args)
         (if (null? unchecked-args)
@@ -34,10 +35,13 @@
                         (let ((raised-args (raise-args checked-args)))
                             (unify-iter raised-args unchecked-args)))))))
     (unify-iter (list (car args)) (cdr args)))
+
 (define (get-proc op args)
     (let ((type-tags (map type-tag args)))
         (get op type-tags)))
 
+;apply-generic will first try to apply the op to the args, and if no operation for those arg types exist, apply-generic will attempt to unify the types of the args
+;and apply the operation to the type-unified args
 (define (apply-generic op . args)
     (let ((proc (get-proc op args)))
     (if proc
@@ -46,10 +50,6 @@
             (let ((unified-proc (get-proc op unified-args)))
             (if unified-proc
                 (apply unified-proc (map contents unified-args))
-                (error "No method for these types: APPLY-GENERIC" (list op type-tags))))))))
+                (error "No method for these types: APPLY-GENERIC" (list op (map type-tag args)))))))))
+
             
-(define s (make-scheme-number 5))
-(define r (make-rat 1 2))
-(define z (make-complex-from-mag-ang 3 1))
-(newline)
-(display (add r z))

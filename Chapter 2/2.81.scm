@@ -2,7 +2,7 @@
 ;;b) Something does have to happen about type coertion to prevent users doing what Louis did in adding same-type coertion to their packages.
 (define (apply-generic op . args)
     (let ((type-tags (map type-tag args)))
-        (let ((proc (get op type-tags))) 
+        (let ((proc (get op) type-tags))) 
             (if proc
                 (apply proc (map contents args)) 
                 (if (= (length args) 2)
