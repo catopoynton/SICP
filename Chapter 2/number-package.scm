@@ -1,4 +1,5 @@
 (load "/Users/catopoynton/Desktop/SICP/Chapter 2/lookup-table.scm")
+(load "/Users/catopoynton/Desktop/SICP/Chapter 2/polynomial-package.scm")
 
 (define (install-scheme-number-package)
     (define (tag x) (attach-tag 'scheme-number x))
@@ -30,6 +31,8 @@
          raise)
     (put 'project '(scheme-number)
         project-to-rational)
+    (put '=zero? '(scheme-number)
+        (lambda (x) (= 0 x)))
     'done)
 
 (define (install-rational-package) ;; internal procedures
@@ -60,7 +63,9 @@
     (define (square x)
         (make-rat (* (numer x) (numer x)) (* (denom x) (denom x))))
     (define (s-sqrt x)
-        (make-scheme-number (/ (sqrt (numer x)) (sqrt (denom x))))) 
+        (make-scheme-number (/ (sqrt (numer x)) (sqrt (denom x)))))
+    (define (=zero? x)
+        (= 0 (numer x))) 
     
     ;;interface to the rest of the system    
     (put 'add '(rational rational)
@@ -81,6 +86,8 @@
         (lambda (x) (s-atan (raise x))))
     (put 'square '(rational)
         (lambda (x) (tag (square x))))
+    (put '=zer0 '(rational)
+        =zero?)
     (put 's-sqrt '(rational)
         s-sqrt)
     (put 'raise '(rational) 
@@ -100,7 +107,7 @@
     (define (make-from-mag-ang r a)
         (cons (mul r (cos a)) (mul r (sin a))))
     (define (tag x) 
-        (attach-tag 'rectangular x)) 
+        (attach-tag 'rectangular x))
     (put 'real-part '(rectangular) real-part) 
     (put 'imag-part '(rectangular) imag-part) 
     (put 'magnitude '(rectangular) magnitude) 
@@ -112,27 +119,27 @@
     'done)
 
 (define (install-polar-package)
-;; internal procedures
-(define (magnitude z) (car z))
-(define (angle z) (cdr z))
-(define (make-from-mag-ang r a) (cons r a))
-(define (real-part z) (mul (magnitude z) 
-    (s-cos (angle z)))) 
-(define (imag-part z) (mul (magnitude z) 
-    (s-sin (angle z)))) 
-(define (make-from-real-imag x y)
-    (cons (s-sqrt (add (square x) (square y)))
-          (s-atan y x)))
-;; interface to the rest of the system
-(define (tag x) (attach-tag 'polar x)) 
-(put 'real-part '(polar) real-part) 
-(put 'imag-part '(polar) imag-part) 
-(put 'magnitude '(polar) magnitude)
-(put 'angle '(polar) angle)
-(put 'make-from-real-imag 'polar
-    (lambda (x y) (tag (make-from-real-imag x y))))
-(put 'make-from-mag-ang 'polar
-    (lambda (r a) (tag (make-from-mag-ang r a)))) 'done)
+    ;; internal procedures
+    (define (magnitude z) (car z))
+    (define (angle z) (cdr z))
+    (define (make-from-mag-ang r a) (cons r a))
+    (define (real-part z) (mul (magnitude z) 
+        (s-cos (angle z)))) 
+    (define (imag-part z) (mul (magnitude z) 
+        (s-sin (angle z)))) 
+    (define (make-from-real-imag x y)
+        (cons (s-sqrt (add (square x) (square y)))
+            (s-atan y x)))
+    ;; interface to the rest of the system
+    (define (tag x) (attach-tag 'polar x)) 
+    (put 'real-part '(polar) real-part) 
+    (put 'imag-part '(polar) imag-part) 
+    (put 'magnitude '(polar) magnitude)
+    (put 'angle '(polar) angle)
+    (put 'make-from-real-imag 'polar
+        (lambda (x y) (tag (make-from-real-imag x y))))
+    (put 'make-from-mag-ang 'polar
+        (lambda (r a) (tag (make-from-mag-ang r a)))) 'done)
 
 (define (install-complex-package)
     ;; imported procedures from rectangular and polar packages (define (make-from-real-imag x y)
@@ -154,6 +161,8 @@
                             (sub (angle z1) (angle z2))))
     (define (project-to-scheme-number z)
         (make-scheme-number (real-part z)))
+    (define (=complex-zero? z)
+        (=zero? (magnitude z)))
     ;; interface to rest of the system
     (define (tag z) (attach-tag 'complex z))
     (put 'add '(complex complex)
@@ -174,25 +183,31 @@
     (put 'imag-part '(complex) imag-part) 
     (put 'magnitude '(complex) magnitude) 
     (put 'angle '(complex) angle)
+    (put '=zero? '(complex) =complex-zero?)
     'done)
 
 (define (attach-tag type-tag contents) 
-    (cons type-tag contents))
+    (if (number? contents)
+        contents
+        (cons type-tag contents)))
 
 (define (type-tag datum) 
-    (if (pair? datum)
-        (car datum)
-        (error "Bad tagged datum: TYPE-TAG" datum)))
+    (cond ((pair? datum) (car datum))
+        ((number? datum) 'scheme-number)
+        (else (error "Bad tagged datum: TYPE-TAG" datum))))
 
 (define (contents datum)
-    (if (pair? datum) (cdr datum)
-    (error "Bad tagged datum: CONTENTS" datum)))
+    (cond ((pair? datum) (cdr datum))
+        ((number? datum) datum)
+        (else (error "Bad tagged datum: CONTENTS" datum))))
 
 (install-rectangular-package)
 (install-polar-package)
 (install-complex-package)
 (install-scheme-number-package)
 (install-rational-package)
+(install-sparse-polynomial-package)
+(install-polynomial-package)
 
 (define (add x y) (apply-generic 'add x y))
 (define (sub x y) (apply-generic 'sub x y)) 
@@ -210,6 +225,8 @@
 (define (s-atan x) (apply-generic 's-atan x))
 (define (s-sqrt x) (apply-generic 's-sqrt x))
 (define (square x) (apply-generic 'square x))
+(define (=zero? x) (apply-generic '=zero? x))
+(define (negate x) (apply-generic 'negate x))
 
 (define (make-complex-from-real-imag x y) 
     ((get 'make-from-real-imag 'complex) x y))
@@ -219,6 +236,10 @@
     ((get 'make 'scheme-number) x))
 (define (make-rat x y)
     ((get 'make 'rational) x y))
+(define (make-sparse-polynomial var terms) 
+    ((get 'make-sparse-polynomial 'polynomial) var terms))
+(define (make-dense-polynomial var terms) 
+    ((get 'make-dense-polynomial 'polynomial) var terms))
 
 
 
