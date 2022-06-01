@@ -201,13 +201,7 @@
         ((number? datum) datum)
         (else (error "Bad tagged datum: CONTENTS" datum))))
 
-(install-rectangular-package)
-(install-polar-package)
-(install-complex-package)
-(install-scheme-number-package)
-(install-rational-package)
-(install-sparse-polynomial-package)
-(install-polynomial-package)
+
 
 (define (add x y) (apply-generic 'add x y))
 (define (sub x y) (apply-generic 'sub x y)) 
@@ -241,6 +235,12 @@
 (define (make-dense-polynomial var terms) 
     ((get 'make-dense-polynomial 'polynomial) var terms))
 
-
+(install-rectangular-package)
+(install-polar-package)
+(install-complex-package)
+(install-scheme-number-package)
+(install-rational-package)
+(install-sparse-polynomial-package)
+(install-polynomial-package)
 
 

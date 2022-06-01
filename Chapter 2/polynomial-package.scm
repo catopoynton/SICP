@@ -2,31 +2,28 @@
 (define (install-sparse-polynomial-package)
     ;; internal procedures
     ;; representation of poly
+    (define (variable p) (car p))
+    (define (term-list p) (cdr p))
+    (define (variable? x) (symbol? x))
 
-(define (variable p) (car p))
-
-(define (term-list p) (cdr p))
-
-(define (variable? x) (symbol? x))
-
-(define (same-variable? v1 v2)
-    (and (variable? v1) (variable? v2) (eq? v1 v2)))
+    (define (same-variable? v1 v2)
+        (and (variable? v1) (variable? v2) (eq? v1 v2)))
 
     (define (make-sparse-poly variable term-list) 
         (cons variable term-list)) 
-    
+
     (define (add-poly p1 p2)
         (if (same-variable? (variable p1) (variable p2))
-            (make-poly (variable p1)
+            (make-sparse-poly (variable p1)
                 (add-terms (term-list p1) (term-list p2)))
             (error "Polys not in same var: ADD-POLY" (list p1 p2))))
-    
+        
     (define (sub-poly p1 p2)
         (add-poly p1 (negate-poly p2)))
     
     (define (mul-poly p1 p2)
         (if (same-variable? (variable p1) (variable p2)) 
-            (make-poly (variable p1)
+            (make-sparse-poly (variable p1)
                 (mul-terms (term-list p1) (term-list p2))) 
             (error "Polys not in same var: MUL-POLY" (list p1 p2))))
 
@@ -54,6 +51,7 @@
             (the-empty-termlist)
             (add-terms (mul-term-by-all-terms (first-term L1) L2) 
                                 (mul-terms (rest-terms L1) L2))))
+
     (define (mul-term-by-all-terms t1 L) 
         (if (empty-termlist? L)
             (the-empty-termlist)
@@ -73,17 +71,42 @@
             ((empty-termlist? (term-list p))
                 #t)
             ((=zero? (coeff (first-term (term-list p))))
-                (=zero?-polynomial (make-poly 
+                (=zero?-polynomial (make-sparse-poly 
                                         (variable p) 
                                         (rest-terms (term-list p)))))
             (else
                 #f)))
 
     (define (negate-poly p)
-        (let ((neg-poly (make-poly (variable p) (list (list 0 -1)))))
+        (let ((neg-poly (make-sparse-poly (variable p) (list (list 0 -1)))))
             (mul-poly neg-poly p)))
 
+    (define (div-poly p1 p2)
+        (if (same-variable? (variable p1) (variable p2))
+            (let ((result (div-terms (term-list p1) (term-list p2))))
+                (list (make-sparse-poly (variable p1) (car result)) (make-sparse-poly (variable p1) (cadr result))))
+                (error "Polys not in same var: MUL-POLY" (list p1 p2)))) 
 
+    (define (next-div L1 L2 result-term)
+        (let ((partial-result (mul-term-by-all-terms result-term L2)))
+            (let ((p1 (make-sparse-poly 'p L1))
+                (p2 (make-sparse-poly 'p partial-result)))
+                    (term-list (sub-poly p1 p2)))))
+
+    (define (div-terms L1 L2) 
+        (if (empty-termlist? L1)
+            (list (the-empty-termlist) (the-empty-termlist)) 
+            (let ((t1 (first-term L1))
+                (t2 (first-term L2)))
+                (if (> (order t2) (order t1))
+                    (list (the-empty-termlist) L1)
+                    (let ((new-c (div (coeff t1) (coeff t2)))
+                        (new-o (- (order t1) (order t2))))
+                            (let ((result-term (make-term new-o new-c)))
+                                (let ((remain (div-terms (next-div L1 L2 result-term) L2)))
+                                    (newline)
+                                    (cons (adjoin-term result-term (first-term remain)) (rest-terms remain)))))))))
+                    
     (define (the-empty-termlist) '())
     (define (first-term term-list) (car term-list))
     (define (rest-terms term-list) (cdr term-list)) 
@@ -104,6 +127,8 @@
         (lambda (p) (tag (negate-poly p))))
     (put 'sub '(polynomial polynomial)
         (lambda (p1 p2) (tag (sub-poly p1 p2))))
+    (put 'div '(sparse sparse)
+        (lambda (p1 p2) (map tag (div-poly p1 p2))))
     (put '=zero? '(polynomial)
         =zero?-polynomial)
         'done)
@@ -130,10 +155,8 @@
         ((get 'make 'sparse) variable termlist))
     
     (define (add-polynomial p1 p2)
-        (display p1)
-        (display"   ")
-        (display p2)
         (add p1 p2))
+        
     ;; interface to rest of the system
     (define (tag p) (attach-tag 'polynomial p))
     (put 'make-dense-polynomial 'polynomial
@@ -142,7 +165,10 @@
         (lambda (variable term-list) (tag (make-sparse-polynomial variable term-list))))
     (put 'add '(polynomial polynomial)
          (lambda (p1 p2) (tag (add-polynomial p1 p2))))
+    (put 'div '(polynomial polynomial)
+        (lambda (p1 p2) (map tag (div p1 p2))))
 'done)
 
 
 
+ 
