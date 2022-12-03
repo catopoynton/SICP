@@ -1,0 +1,41 @@
+(define (make-accumulator total)
+    (define (accumulate a)
+         (begin (set! total (+ total a)) total))
+    accumulate)
+
+(define (make-monitored f)
+    (let ((count 0))
+        (define (monitored arg)
+            (begin (set! count (+ 1 count))
+                (f arg)))
+        (define (dispatch arg)
+            (if (eq? arg 'how-many-calls?)
+                count
+                (monitored arg)))
+        dispatch))
+
+(define (factorial n)
+    (if (eq? n 1)
+        1
+        (* n (factorial (- n 1)))))
+
+(define s (make-monitored factorial)) 
+
+(define (make-account balance password) 
+    (define (withdraw amount)
+        (if (>= balance amount)
+            (begin (set! balance (- balance amount)) balance)
+            "Insufficient funds"))
+        (define (deposit amount login)
+            (set! balance (+ balance amount))
+                balance)
+    (define (dispatch l m)
+        (if (not (eq? l password))
+            (error "incorrect login details")
+            (cond 
+                ((eq? m 'withdraw) withdraw)
+                ((eq? m 'deposit) deposit)
+                (else (error "Unknown request: MAKE-ACCOUNT" m)))))
+    (define (authenticate login)
+        (eq? login password))
+    dispatch)

@@ -1,0 +1,30 @@
+(define (make-account balance password)
+    (let ((passwords (list password)))
+        (define (add-password password)
+                    (begin (set! passwords (cons password passwords))))
+        (define (withdraw amount)
+            (if (>= balance amount)
+                (begin (set! balance (- balance amount)) balance)
+                "Insufficient funds"))
+            (define (deposit amount login)
+                (set! balance (+ balance amount))
+                    balance)
+        (define (dispatch l m)
+            (if (not (eq? l password))
+                (error "incorrect login details")
+                (cond 
+                    ((eq? m 'withdraw) withdraw)
+                    ((eq? m 'deposit) deposit)
+                    ((eq? m 'add-password') add-password))
+                    (else (error "Unknown request: MAKE-ACCOUNT" m)))))
+        (define (authenticate login)
+            (contains? login passwords))
+        dispatch)
+
+
+(define (contains? item list)
+    (cond 
+        ((null? list) #f)
+        ((eq? (car list) item #t))
+        (else (contains? item (cdr list)))))
+

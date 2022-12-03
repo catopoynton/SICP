@@ -1,5 +1,6 @@
 (load "/Users/catopoynton/Desktop/SICP/Chapter 2/lookup-table.scm")
 (load "/Users/catopoynton/Desktop/SICP/Chapter 2/polynomial-package.scm")
+(define num-types '(scheme-number complex rational))
 
 (define (install-scheme-number-package)
     (define (tag x) (attach-tag 'scheme-number x))
@@ -7,6 +8,7 @@
         (make-complex-from-real-imag x 0))
     (define (project-to-rational x)
         (make-rat (floor (* 100 x)) 100))
+
     (put 'add '(scheme-number scheme-number)
         (lambda (x y) (tag (+ x y))))
     (put 'sub '(scheme-number scheme-number)
@@ -186,6 +188,11 @@
     (put '=zero? '(complex) =complex-zero?)
     'done)
 
+;mixed types need to be added twice, the second time with the type names swapped
+(define (put-mixed-type t1 t2 op-name op)
+    (put op-name (list t1 t2) op)
+    (put op-name (list t2 t1) op))
+
 (define (attach-tag type-tag contents) 
     (if (number? contents)
         contents
@@ -200,8 +207,6 @@
     (cond ((pair? datum) (cdr datum))
         ((number? datum) datum)
         (else (error "Bad tagged datum: CONTENTS" datum))))
-
-
 
 (define (add x y) (apply-generic 'add x y))
 (define (sub x y) (apply-generic 'sub x y)) 

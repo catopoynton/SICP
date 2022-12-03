@@ -34,7 +34,8 @@
     (let
         ((p2 (make-sparse-polynomial 'x (list (list 2 1) (list 0 1))))
         (p1 (make-sparse-polynomial 'x (list (list 5 1) (list 0 -1)))))
-            (div p1 p2)))
+            (div p1 p2)
+            (add 6 p1)))
 
     
 

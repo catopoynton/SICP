@@ -129,8 +129,10 @@
         (lambda (p1 p2) (tag (sub-poly p1 p2))))
     (put 'div '(sparse sparse)
         (lambda (p1 p2) (map tag (div-poly p1 p2))))
-    (put '=zero? '(polynomial)
+    (put '=zero? '(sparse)
         =zero?-polynomial)
+    (put 'variable '(sparse)
+        variable)
         'done)
 
 (define (install-dense-polynomial-package)
@@ -148,6 +150,8 @@
 
 
 (define (install-polynomial-package)
+
+
     (define (make-dense-polynomial variable termlist)
         ((get 'make 'dense) variable termlist))
 
@@ -156,6 +160,15 @@
     
     (define (add-polynomial p1 p2)
         (add p1 p2))
+
+    (define (make-polynomial-from-num var num)
+        (make-sparse-polynomial var (list (list 0 num))))
+
+    (put 'add '(scheme-number polynomial)
+        (lambda (s p) (add (make-polynomial-from-num (variable p) s) p)))
+
+    (put 'add '(polynomial scheme-number)
+        (lambda (p s) (add (make-polynomial-from-num (variable p) s) p)))
         
     ;; interface to rest of the system
     (define (tag p) (attach-tag 'polynomial p))
@@ -167,8 +180,8 @@
          (lambda (p1 p2) (tag (add-polynomial p1 p2))))
     (put 'div '(polynomial polynomial)
         (lambda (p1 p2) (map tag (div p1 p2))))
+    (put 'variable 'polynomial variable)
 'done)
 
-
-
+(define (variable p) (apply-generic 'variable p)) 
  
