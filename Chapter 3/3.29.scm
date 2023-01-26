@@ -1,0 +1,12 @@
+; using De-Morgans laws that -(a or b) = -((-a) and (-b))
+; delay wil be and-delay + 2*inverter-delay
+(define (or-gate a1 a2 output)
+    (define (or-action-proc)
+        (let ((c make-wire) (d make-wire) (e make-wire))
+        (inverter a1 c)
+        (inverter a2 d)
+        (and-gate c d e)
+        (inverter e output)))
+    (add-action! a1 or-action-procedure)
+    (add-action! a2 or-action-procedure)
+    'ok)    
